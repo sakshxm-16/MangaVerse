@@ -1,0 +1,87 @@
+<%- include('partials/header.ejs') %>
+
+<section class="settings-page">
+    <div class="settings-heading">
+        <div class="settings-avatar">
+            <% if (currentUser.hasProfilePicture) { %>
+                <img src="/profile/picture" alt="">
+            <% } else { %>
+                <%= currentUser.username.slice(0, 1).toUpperCase() %>
+            <% } %>
+        </div>
+        <div>
+            <p class="eyebrow">YOUR ACCOUNT</p>
+            <h1>Settings</h1>
+            <p><%= currentUser.username %> · <%= currentUser.email %></p>
+        </div>
+    </div>
+
+    <a class="settings-theme-link" href="/settings/themes">
+        <span><strong>Appearance theme</strong><small>Choose the colors used across MangaVerse.</small></span>
+        <span>Manage themes <span aria-hidden="true">→</span></span>
+    </a>
+
+    <% if (saved) { %><p class="form-message form-message-success" role="status">Your settings have been saved.</p><% } %>
+    <% if (typeof error !== 'undefined' && error) { %><p class="form-message form-message-error" role="alert"><%= error %></p><% } %>
+
+    <form class="settings-form" action="/settings" method="post" data-settings-form data-saved="<%= saved %>">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <section class="settings-group">
+            <div class="settings-group-heading">
+                <h2>Home page</h2>
+                <p>Choose what appears when you visit Discover.</p>
+            </div>
+            <label class="settings-option">
+                <span><strong>Show trending titles</strong><small>Display popular manga above the catalog.</small></span>
+                <input type="checkbox" name="showTrending" <%= preferences.showTrending ? 'checked' : '' %>>
+            </label>
+            <label class="settings-option">
+                <span><strong>Show Continue Reading</strong><small>Display your recent chapters on the home page.</small></span>
+                <input type="checkbox" name="showContinueReading" <%= preferences.showContinueReading ? 'checked' : '' %>>
+            </label>
+            <label class="settings-option">
+                <span><strong>Show new chapters from bookmarks</strong><small>Display the latest chapter numbers for saved titles.</small></span>
+                <input type="checkbox" name="showBookmarkedUpdates" <%= preferences.showBookmarkedUpdates ? 'checked' : '' %>>
+            </label>
+        </section>
+
+        <section class="settings-group">
+            <div class="settings-group-heading">
+                <h2>Notifications</h2>
+                <p>Choose which bookmark folders can trigger new chapter alerts.</p>
+            </div>
+            <div class="settings-notification-folders">
+                <% bookmarkFolders.forEach((folder) => { %>
+                    <label class="settings-option settings-notification-option">
+                        <span><strong><%= folder.name %></strong><small>Notify me about updates in this folder.</small></span>
+                        <input type="hidden" name="notificationFolderIds" value="<%= folder.id %>">
+                        <input type="checkbox" name="notificationFolders" value="<%= folder.id %>" <%= !preferences.mutedNotificationFolders.includes(folder.id) ? 'checked' : '' %>>
+                    </label>
+                <% }) %>
+                <div data-custom-notification-folders></div>
+                <p class="settings-notification-empty" data-no-custom-notification-folders>Create a custom bookmark folder to configure its notifications here.</p>
+            </div>
+        </section>
+
+        <section class="settings-group">
+            <div class="settings-group-heading">
+                <h2>Reader</h2>
+                <p>Set the default page width for chapter reading.</p>
+            </div>
+            <label class="settings-option settings-select-option">
+                <span><strong>Default page width</strong><small>You can still change this in the reader.</small></span>
+                <select name="readerWidth" data-settings-reader-width>
+                    <option value="wide" <%= preferences.readerWidth === 'wide' ? 'selected' : '' %>>Wide</option>
+                    <option value="medium" <%= preferences.readerWidth === 'medium' ? 'selected' : '' %>>Medium</option>
+                    <option value="fit" <%= preferences.readerWidth === 'fit' ? 'selected' : '' %>>Fit screen</option>
+                </select>
+            </label>
+        </section>
+
+        <div class="settings-actions">
+            <button class="button button-primary" type="submit">Save settings</button>
+        </div>
+    </form>
+</section>
+
+<%- include('partials/footer.ejs') %>

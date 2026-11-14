@@ -1,0 +1,28 @@
+<%- include('partials/header.ejs') %>
+
+<section class="auth-page">
+    <div class="auth-card">
+        <p class="eyebrow">WELCOME BACK</p>
+        <h1>Sign in</h1>
+        <p class="auth-intro">Sign in to sync your settings across sessions.</p>
+        <% if (error) { %><p class="form-message form-message-error" role="alert"><%= error %></p><% } %>
+        <% if (reset) { %><p class="form-message form-message-success" role="status">Your password was reset. Sign in with your new password.</p><% } %>
+        <form class="account-form" action="/login" method="post">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <input type="hidden" name="next" value="<%= next %>">
+            <label>
+                <span>Username or email</span>
+                <input type="text" name="identifier" value="<%= identifier %>" autocomplete="username" required>
+            </label>
+            <label>
+                <span>Password</span>
+                <input type="password" name="password" autocomplete="current-password" required>
+            </label>
+            <a class="forgot-password-link" href="/forgot-password">Forgot password?</a>
+            <button class="button button-primary" type="submit">Sign in</button>
+        </form>
+        <p class="auth-switch">New to MangaVerse? <a href="/register">Create an account</a></p>
+    </div>
+</section>
+
+<%- include('partials/footer.ejs') %>

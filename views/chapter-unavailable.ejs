@@ -1,0 +1,23 @@
+<%- include('partials/header.ejs') %>
+
+<section class="error-page chapter-unavailable">
+    <span class="error-code">NO PAGES FOUND</span>
+    <h1><%= chapterTitle %></h1>
+    <p><%= mangaTitle %> · MangaDex has no readable page files for this chapter.</p>
+    <div class="unavailable-actions">
+        <% if (externalUrl) { %>
+            <a class="button button-primary" href="<%= externalUrl %>" target="_blank" rel="noreferrer">Open official source ↗</a>
+        <% } %>
+        <a class="button button-secondary" href="/title/<%= mangaId %>">Back to all chapters</a>
+    </div>
+    <% if (alternatives.length) { %>
+        <div class="alternative-chapters">
+            <p class="eyebrow">TRY ANOTHER CHAPTER</p>
+            <% alternatives.forEach((chapter) => { %>
+                <a href="/read/<%= chapter.id %>"><%= chapter.label %><span aria-hidden="true"> →</span></a>
+            <% }) %>
+        </div>
+    <% } %>
+</section>
+
+<%- include('partials/footer.ejs') %>

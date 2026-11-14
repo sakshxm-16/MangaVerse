@@ -1,0 +1,21 @@
+<%- include('partials/header.ejs') %>
+
+<section class="continue-reading-page">
+    <div class="section-heading">
+        <div>
+            <p class="eyebrow">YOUR READING HISTORY</p>
+            <h1>Continue Reading</h1>
+            <p class="library-intro">Your most recent chapters, saved on this device.</p>
+        </div>
+        <a class="button button-secondary" href="/bookmarks">Bookmarks</a>
+    </div>
+    <div class="continue-reading-page-list" data-reading-history-page></div>
+    <div class="empty-state" data-reading-history-page-empty hidden>
+        <span class="empty-icon">◷</span>
+        <h2>No chapters yet</h2>
+        <p>Open a chapter and it will appear here.</p>
+        <a class="button button-primary" href="/">Discover manga</a>
+    </div>
+</section>
+
+<%- include('partials/footer.ejs') %>

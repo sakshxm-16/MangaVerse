@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en" data-theme="<%= activeTheme.id %>" data-theme-mode="<%= themeMode %>" style="<%= themeStyle %>">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="<%= activeTheme.background %>">
+    <title><%= pageTitle %> · MangaVerse</title>
+    <link rel="preconnect" href="https://uploads.mangadex.org">
+    <link rel="stylesheet" href="/styles/styles.css">
+    <script src="/scripts/site.js" defer></script>
+</head>
+<body data-muted-notification-folders="<%= JSON.stringify(userPreferences.mutedNotificationFolders) %>">
+    <header class="site-header">
+        <div class="header-inner">
+            <a class="brand" href="/" aria-label="MangaVerse home"><span class="brand-mark">M</span><span>Manga<span class="brand-accent">Verse</span></span></a>
+            <div class="header-tools">
+                <form class="search-form" action="/search" method="get" role="search">
+                    <label class="sr-only" for="site-search">Search manga</label>
+                    <span class="search-icon" aria-hidden="true">⌕</span>
+                    <input id="site-search" type="search" name="q" value="<%= typeof query === 'string' ? query : '' %>" placeholder="Search manga..." maxlength="120">
+                    <button type="submit" aria-label="Search">Search</button>
+                </form>
+                <details class="notifications-menu" data-notifications-menu>
+                    <summary class="notifications-trigger" aria-label="Open notifications" title="Notifications">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"></path></svg>
+                        <span class="notification-badge" data-notification-badge hidden></span>
+                    </summary>
+                    <div class="notifications-panel" role="dialog" aria-labelledby="notification-panel-title">
+                        <div class="notifications-panel-heading">
+                            <h2 id="notification-panel-title">Notifications</h2>
+                            <span data-notification-unread></span>
+                        </div>
+                        <ul class="notification-list notification-preview-list" data-notification-preview></ul>
+                        <p class="notification-preview-empty" data-notification-preview-empty hidden>You're all caught up.</p>
+                        <a class="notification-view-all" href="/notifications">View all notifications <span aria-hidden="true">→</span></a>
+                    </div>
+                </details>
+                <div class="header-account">
+                    <% if (currentUser) { %>
+                        <details class="account-menu" data-account-menu>
+                            <summary class="account-menu-trigger" aria-label="Open account menu" title="Account">
+                                <% if (currentUser.hasProfilePicture) { %>
+                                    <img class="account-trigger-picture" src="/profile/picture" alt="">
+                                <% } else { %>
+                                    <span class="account-trigger-avatar" aria-hidden="true"><%= currentUser.username.slice(0, 1).toUpperCase() %></span>
+                                <% } %>
+                            </summary>
+                            <div class="account-menu-panel">
+                                <div class="account-menu-identity">
+                                    <span class="account-menu-avatar" aria-hidden="true">
+                                        <% if (currentUser.hasProfilePicture) { %>
+                                            <img src="/profile/picture" alt="">
+                                        <% } else { %>
+                                            <%= currentUser.username.slice(0, 1).toUpperCase() %>
+                                        <% } %>
+                                    </span>
+                                    <div>
+                                        <strong><%= currentUser.username %></strong>
+                                        <small><%= currentUser.email %></small>
+                                    </div>
+                                </div>
+                                <nav class="account-menu-links" aria-label="Account options">
+                                    <a href="/profile"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5"></circle><path d="M5 20a7 7 0 0 1 14 0"></path></svg>Profile</a>
+                                    <a href="/continue-reading"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>Continue Reading</a>
+                                    <a href="/bookmarks"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4h10a1 1 0 0 1 1 1v16l-6-4-6 4V5a1 1 0 0 1 1-1z"></path></svg>Bookmarks</a>
+                                    <a href="/settings"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 17h16"></path><circle cx="8" cy="7" r="2"></circle><circle cx="16" cy="17" r="2"></circle></svg>Settings</a>
+                                </nav>
+                                <form class="account-menu-logout" action="/logout" method="post">
+                                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                    <button type="submit"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 17l5-5-5-5M15 12H3M13 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6"></path></svg>Log out</button>
+                                </form>
+                            </div>
+                        </details>
+                    <% } else { %>
+                        <a class="account-link" href="/login">Sign in</a>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </header>
+    <main class="page-shell">

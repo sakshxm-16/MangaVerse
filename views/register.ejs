@@ -1,0 +1,36 @@
+<%- include('partials/header.ejs') %>
+
+<section class="auth-page">
+    <div class="auth-card">
+        <p class="eyebrow">START YOUR LIBRARY</p>
+        <h1>Create account</h1>
+        <p class="auth-intro">Save your preferences and keep your reading setup close.</p>
+        <% if (error) { %><p class="form-message form-message-error" role="alert"><%= error %></p><% } %>
+        <form class="account-form" action="/register" method="post">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <input type="hidden" name="next" value="<%= next %>">
+            <label>
+                <span>Username</span>
+                <input type="text" name="username" value="<%= username %>" minlength="3" maxlength="24" pattern="[A-Za-z0-9_]+" autocomplete="username" required>
+                <small>3–24 letters, numbers, or underscores.</small>
+            </label>
+            <label>
+                <span>Email</span>
+                <input type="email" name="email" value="<%= email %>" maxlength="254" autocomplete="email" required>
+            </label>
+            <label>
+                <span>Password</span>
+                <input type="password" name="password" minlength="8" maxlength="128" autocomplete="new-password" required>
+                <small>Use at least 8 characters.</small>
+            </label>
+            <label>
+                <span>Confirm password</span>
+                <input type="password" name="passwordConfirmation" minlength="8" maxlength="128" autocomplete="new-password" required>
+            </label>
+            <button class="button button-primary" type="submit">Create account</button>
+        </form>
+        <p class="auth-switch">Already registered? <a href="/login">Sign in</a></p>
+    </div>
+</section>
+
+<%- include('partials/footer.ejs') %>

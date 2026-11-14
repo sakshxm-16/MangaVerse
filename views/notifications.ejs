@@ -1,0 +1,22 @@
+<%- include('partials/header.ejs') %>
+
+<section class="notifications-page">
+    <div class="notifications-page-heading">
+        <div>
+            <p class="eyebrow">YOUR UPDATES</p>
+            <h1>Notifications</h1>
+            <p>New chapter alerts from your bookmarked titles.</p>
+        </div>
+        <button class="button button-secondary" type="button" data-mark-notifications-read hidden>Mark all as read</button>
+    </div>
+    <ul class="notification-list notification-page-list" data-notifications-page-list></ul>
+    <div class="notifications-empty" data-notifications-page-empty hidden>
+        <div class="notifications-symbol" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"></path></svg></div>
+        <p class="eyebrow">ALL CAUGHT UP</p>
+        <h2>No notifications yet</h2>
+        <p>New chapter alerts for bookmarked titles will appear here.</p>
+        <a class="button button-secondary" href="/bookmarks">View bookmarks</a>
+    </div>
+</section>
+
+<%- include('partials/footer.ejs') %>

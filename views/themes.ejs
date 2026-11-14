@@ -1,0 +1,156 @@
+<%- include('partials/header.ejs') %>
+
+<section class="themes-page">
+    <a class="back-link" href="/settings">← Settings</a>
+    <div class="themes-heading">
+        <p class="eyebrow">PERSONALIZE YOUR READER</p>
+        <h1>Themes</h1>
+        <p>Choose a palette or make your own. Green-black is the default.</p>
+    </div>
+
+    <% if (saved) { %><p class="form-message form-message-success" role="status">Your theme has been saved.</p><% } %>
+    <% if (customSaved) { %><p class="form-message form-message-success" role="status">Your custom theme has been saved and applied.</p><% } %>
+    <% if (customDeleted) { %><p class="form-message form-message-success" role="status">Your custom theme has been deleted.</p><% } %>
+    <% if (typeof error !== 'undefined' && error) { %><p class="form-message form-message-error" role="alert"><%= error %></p><% } %>
+
+    <form class="themes-form" action="/settings/themes" method="post">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <fieldset class="theme-choice-group">
+            <legend>Built-in themes</legend>
+            <div class="theme-options">
+                <% themes.forEach((theme) => { %>
+                    <label class="theme-option">
+                        <input type="radio" name="theme" value="<%= theme.id %>" <%= preferences.theme === theme.id ? 'checked' : '' %> required>
+                        <span class="theme-option-card">
+                            <span class="theme-preview" style="--preview-bg: <%= theme.background %>; --preview-surface: <%= theme.surface %>; --preview-accent: <%= theme.accent %>">
+                                <span class="theme-preview-header"></span>
+                                <span class="theme-preview-line"></span>
+                                <span class="theme-preview-mark"></span>
+                            </span>
+                            <span class="theme-option-info">
+                                <strong><%= theme.name %></strong>
+                                <small><%= theme.id === 'green-black' ? 'Default theme' : 'Built-in color palette' %></small>
+                            </span>
+                            <span class="theme-option-check" aria-hidden="true"></span>
+                        </span>
+                    </label>
+                <% }) %>
+            </div>
+        </fieldset>
+
+        <fieldset class="theme-choice-group">
+            <legend>Your custom themes</legend>
+            <% if (customThemes.length) { %>
+                <div class="theme-options">
+                    <% customThemes.forEach((theme) => { %>
+                        <label class="theme-option">
+                            <input type="radio" name="theme" value="<%= theme.id %>" <%= preferences.theme === theme.id ? 'checked' : '' %>>
+                            <span class="theme-option-card">
+                                <span class="theme-preview" style="--preview-bg: <%= theme.background %>; --preview-surface: <%= theme.surface %>; --preview-accent: <%= theme.accent %>">
+                                    <span class="theme-preview-header"></span>
+                                    <span class="theme-preview-line"></span>
+                                    <span class="theme-preview-mark"></span>
+                                </span>
+                                <span class="theme-option-info">
+                                    <strong><%= theme.name %></strong>
+                                    <small>Custom palette</small>
+                                </span>
+                                <span class="theme-option-check" aria-hidden="true"></span>
+                            </span>
+                        </label>
+                    <% }) %>
+                </div>
+            <% } else { %>
+                <p class="custom-themes-empty">No custom themes yet. Create one below.</p>
+            <% } %>
+        </fieldset>
+        <div class="themes-actions">
+            <button class="button button-primary" type="submit">Apply selected theme</button>
+        </div>
+    </form>
+
+    <section class="custom-theme-manager" aria-labelledby="custom-theme-manager-title">
+        <div class="custom-theme-section-heading">
+            <div>
+                <p class="eyebrow">YOUR COLOR PALETTES</p>
+                <h2 id="custom-theme-manager-title">Manage custom themes</h2>
+                <p>Save up to 12 palettes per account. Editing an active theme updates it immediately.</p>
+            </div>
+        </div>
+        <% if (customThemes.length) { %>
+            <ul class="custom-theme-list">
+                <% customThemes.forEach((theme) => { %>
+                    <li class="custom-theme-row">
+                        <span class="theme-color-swatches" aria-hidden="true">
+                            <i style="--swatch-color: <%= theme.background %>"></i>
+                            <i style="--swatch-color: <%= theme.surface %>"></i>
+                            <i style="--swatch-color: <%= theme.accent %>"></i>
+                        </span>
+                        <strong><%= theme.name %></strong>
+                        <div class="custom-theme-actions">
+                            <button
+                                class="button button-secondary"
+                                type="button"
+                                data-theme-edit
+                                data-theme-id="<%= theme.id %>"
+                                data-theme-name="<%= theme.name %>"
+                                data-theme-background="<%= theme.background %>"
+                                data-theme-surface="<%= theme.surface %>"
+                                data-theme-accent="<%= theme.accent %>">Edit</button>
+                            <form action="/settings/themes/custom/<%= theme.id %>/delete" method="post">
+                                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                <button class="button button-secondary custom-theme-delete" type="submit">Delete</button>
+                            </form>
+                        </div>
+                    </li>
+                <% }) %>
+            </ul>
+        <% } %>
+    </section>
+
+    <section class="custom-theme-editor" aria-labelledby="custom-theme-editor-title">
+        <div class="custom-theme-section-heading">
+            <div>
+                <p class="eyebrow">MAKE IT YOURS</p>
+                <h2 id="custom-theme-editor-title" data-custom-theme-editor-title>Create a custom theme</h2>
+                <p>Set the page background, card surface, and accent. Text and supporting colors are chosen for contrast.</p>
+            </div>
+        </div>
+        <form class="custom-theme-form" action="/settings/themes/custom" method="post" data-custom-theme-form>
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <input type="hidden" name="id" value="<%= customThemeDraft.id %>" data-custom-theme-id>
+            <label class="custom-theme-name">
+                <span>Theme name</span>
+                <input type="text" name="name" value="<%= customThemeDraft.name %>" maxlength="32" required placeholder="e.g. Ocean dusk" data-custom-theme-name>
+            </label>
+            <div class="custom-theme-colors">
+                <label>
+                    <span>Background</span>
+                    <input type="color" name="background" value="<%= customThemeDraft.background %>" data-custom-theme-color="background">
+                </label>
+                <label>
+                    <span>Surface</span>
+                    <input type="color" name="surface" value="<%= customThemeDraft.surface %>" data-custom-theme-color="surface">
+                </label>
+                <label>
+                    <span>Accent</span>
+                    <input type="color" name="accent" value="<%= customThemeDraft.accent %>" data-custom-theme-color="accent">
+                </label>
+            </div>
+            <div class="custom-theme-preview">
+                <span class="theme-preview" data-custom-theme-preview style="--preview-bg: <%= customThemeDraft.background %>; --preview-surface: <%= customThemeDraft.surface %>; --preview-accent: <%= customThemeDraft.accent %>">
+                    <span class="theme-preview-header"></span>
+                    <span class="theme-preview-line"></span>
+                    <span class="theme-preview-mark"></span>
+                </span>
+                <span>Live preview</span>
+            </div>
+            <div class="custom-theme-form-actions">
+                <button class="button button-primary" type="submit" data-custom-theme-submit>Save and apply theme</button>
+                <button class="button button-secondary custom-theme-cancel" type="button" data-custom-theme-cancel hidden>Cancel edit</button>
+            </div>
+        </form>
+    </section>
+</section>
+
+<%- include('partials/footer.ejs') %>

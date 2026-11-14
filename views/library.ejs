@@ -1,0 +1,160 @@
+<%- include('partials/header.ejs') %>
+
+<section class="library-page">
+    <div class="library-heading">
+        <div>
+            <p class="eyebrow">YOUR PERSONAL SHELF</p>
+            <h1>Bookmarks</h1>
+            <p class="library-intro">Saved on this device, so your list stays yours.</p>
+        </div>
+        <button class="button button-secondary manage-folders-button" type="button" data-manage-folders>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 17h16"></path><circle cx="8" cy="7" r="2"></circle><circle cx="16" cy="17" r="2"></circle></svg>
+            Manage folders
+        </button>
+    </div>
+
+    <div class="bookmark-folder-tabs" data-bookmark-folder-tabs role="tablist" aria-label="Bookmark folders"></div>
+    <div class="bookmark-toolbar">
+        <label class="bookmark-search" for="bookmark-filter">
+            <span class="sr-only">Search bookmarks</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.3"></circle><path d="m16 16 4.5 4.5"></path></svg>
+            <input id="bookmark-filter" type="search" data-bookmark-filter placeholder="Search titles..." autocomplete="off">
+        </label>
+        <button class="button button-secondary bookmark-filters-toggle" type="button" data-bookmark-filters-toggle aria-expanded="false" aria-controls="bookmark-filters">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M7 12h10m-7 6h4"></path></svg>
+            Filters
+        </button>
+        <span class="bookmark-filter-count" data-bookmark-filter-count aria-live="polite">0 bookmarks</span>
+    </div>
+
+    <section class="bookmark-filters" id="bookmark-filters" data-bookmark-filters hidden aria-label="Filter bookmarks">
+        <div class="filter-grid">
+            <label class="filter-field">
+                <span class="filter-label">Content rating</span>
+                <select data-bookmark-rating>
+                    <option value="">Any rating</option>
+                    <option value="safe">Safe</option>
+                    <option value="suggestive">Suggestive</option>
+                    <option value="erotica">Erotica</option>
+                    <option value="pornographic">Pornographic</option>
+                </select>
+            </label>
+            <label class="filter-field">
+                <span class="filter-label">Type</span>
+                <select data-bookmark-type>
+                    <option value="">Any type</option>
+                    <option value="manga">Manga</option>
+                    <option value="manhwa">Manhwa</option>
+                    <option value="manhua">Manhua</option>
+                </select>
+            </label>
+            <label class="filter-field">
+                <span class="filter-label">Genre</span>
+                <select data-bookmark-genre><option value="">Any genre</option></select>
+            </label>
+            <label class="filter-field">
+                <span class="filter-label">Language</span>
+                <select data-bookmark-language>
+                    <option value="">Any language</option>
+                    <option value="en">English</option>
+                    <option value="ja">Japanese</option>
+                    <option value="ko">Korean</option>
+                    <option value="zh">Chinese</option>
+                    <option value="es">Spanish</option>
+                    <option value="fr">French</option>
+                    <option value="pt-br">Brazilian Portuguese</option>
+                    <option value="ru">Russian</option>
+                    <option value="de">German</option>
+                    <option value="it">Italian</option>
+                    <option value="id">Indonesian</option>
+                    <option value="ar">Arabic</option>
+                    <option value="th">Thai</option>
+                    <option value="vi">Vietnamese</option>
+                    <option value="tr">Turkish</option>
+                    <option value="pl">Polish</option>
+                </select>
+            </label>
+            <label class="filter-field">
+                <span class="filter-label">Status</span>
+                <select data-bookmark-status>
+                    <option value="">Any status</option>
+                    <option value="ongoing">Ongoing</option>
+                    <option value="completed">Completed</option>
+                    <option value="hiatus">Hiatus</option>
+                    <option value="cancelled">Cancelled</option>
+                </select>
+            </label>
+            <label class="filter-field">
+                <span class="filter-label">Author / artist</span>
+                <input type="search" data-bookmark-creator maxlength="100" placeholder="Name">
+            </label>
+            <fieldset class="filter-field year-range">
+                <legend class="filter-label">Release year</legend>
+                <div class="year-inputs">
+                    <label class="sr-only" for="bookmark-year-from">From year</label>
+                    <input id="bookmark-year-from" type="number" data-bookmark-year-from min="1900" max="<%= new Date().getFullYear() %>" placeholder="From">
+                    <span aria-hidden="true">–</span>
+                    <label class="sr-only" for="bookmark-year-to">To year</label>
+                    <input id="bookmark-year-to" type="number" data-bookmark-year-to min="1900" max="<%= new Date().getFullYear() %>" placeholder="To">
+                </div>
+            </fieldset>
+            <label class="filter-field">
+                <span class="filter-label">Minimum chapters</span>
+                <input type="number" data-bookmark-min-chapters min="1" max="9999" placeholder="Any">
+            </label>
+        </div>
+        <div class="filter-actions">
+            <button class="button button-secondary" type="button" data-reset-bookmark-filters>Reset filters</button>
+        </div>
+    </section>
+
+    <div class="bookmark-results-toolbar">
+        <div class="bookmark-sort-tabs" role="group" aria-label="Sort bookmarks">
+            <button type="button" data-bookmark-sort="recently-added" aria-pressed="true">Recently added</button>
+            <button type="button" data-bookmark-sort="recently-read" aria-pressed="false">Recently read</button>
+            <button type="button" data-bookmark-sort="latest-update" aria-pressed="false">Latest update</button>
+        </div>
+        <div class="bookmark-view-toggle" role="group" aria-label="Bookmark layout">
+            <button type="button" data-bookmark-view="grid" aria-pressed="true" aria-label="Grid view">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="6" height="6" rx="1"></rect><rect x="14" y="4" width="6" height="6" rx="1"></rect><rect x="4" y="14" width="6" height="6" rx="1"></rect><rect x="14" y="14" width="6" height="6" rx="1"></rect></svg>
+            </button>
+            <button type="button" data-bookmark-view="list" aria-pressed="false" aria-label="List view">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11"></path><circle cx="4.5" cy="6" r=".7"></circle><circle cx="4.5" cy="12" r=".7"></circle><circle cx="4.5" cy="18" r=".7"></circle></svg>
+            </button>
+        </div>
+    </div>
+    <div class="manga-grid" data-library-grid data-view="grid"></div>
+    <div class="empty-state compact" data-library-no-matches hidden>
+        <span class="empty-icon">⌕</span>
+        <h3>No matching titles</h3>
+        <p>Try changing your search or filters.</p>
+    </div>
+    <div class="empty-state" data-library-empty hidden>
+        <span class="empty-icon">♡</span>
+        <h3>Your bookmarks are waiting</h3>
+        <p>Save a manga with the plus button and it will show up here.</p>
+        <a class="button button-primary" href="/">Find something to read</a>
+    </div>
+</section>
+
+<dialog class="folder-manager-dialog" data-folder-manager aria-labelledby="folder-manager-title">
+    <div class="folder-manager-heading">
+        <div>
+            <p class="eyebrow">ORGANIZE YOUR LIBRARY</p>
+            <h2 id="folder-manager-title">Manage folders</h2>
+        </div>
+        <button class="icon-button" type="button" data-close-folder-manager aria-label="Close folder manager">×</button>
+    </div>
+    <p class="folder-manager-note">The six default folders cannot be removed. Removing a custom folder moves its titles to Plan to Read.</p>
+    <form class="folder-add-form" data-folder-add-form>
+        <label for="new-folder-name">New folder name</label>
+        <div>
+            <input id="new-folder-name" name="name" type="text" maxlength="32" required placeholder="e.g. Favorites">
+            <button class="button button-primary" type="submit">Add folder</button>
+        </div>
+        <p class="folder-manager-error" data-folder-manager-error role="alert" hidden></p>
+    </form>
+    <ul class="custom-folder-list" data-custom-folder-list></ul>
+</dialog>
+
+<%- include('partials/footer.ejs') %>

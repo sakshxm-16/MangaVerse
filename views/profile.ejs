@@ -1,0 +1,111 @@
+<%- include('partials/header.ejs') %>
+
+<section class="profile-page">
+    <div class="profile-page-heading">
+        <p class="eyebrow">YOUR ACCOUNT</p>
+        <h1>Profile</h1>
+        <p>Manage your account details, password, and profile picture.</p>
+    </div>
+    <div class="profile-form-grid">
+        <section class="profile-card">
+            <div class="profile-heading">
+                <div class="profile-avatar">
+                    <% if (currentUser.hasProfilePicture) { %>
+                        <img src="/profile/picture" alt="<%= currentUser.username %> profile picture">
+                    <% } else { %>
+                        <%= currentUser.username.slice(0, 1).toUpperCase() %>
+                    <% } %>
+                </div>
+                <div>
+                    <p class="eyebrow">ACCOUNT DETAILS</p>
+                    <h2><%= currentUser.username %></h2>
+                    <p class="profile-email"><%= currentUser.email %></p>
+                </div>
+            </div>
+            <% if (saved) { %><p class="form-message form-message-success" role="status">Your profile has been updated.</p><% } %>
+            <% if (profileError) { %><p class="form-message form-message-error" role="alert"><%= profileError %></p><% } %>
+            <form class="account-form profile-account-form" action="/profile" method="post">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                <label>
+                    <span>Username</span>
+                    <input type="text" name="username" value="<%= username %>" minlength="3" maxlength="24" pattern="[A-Za-z0-9_]+" autocomplete="username" required>
+                </label>
+                <label>
+                    <span>Email</span>
+                    <input type="email" name="email" value="<%= email %>" maxlength="254" autocomplete="email" required>
+                </label>
+                <label>
+                    <span>Current password</span>
+                    <input type="password" name="currentPassword" autocomplete="current-password" required>
+                    <small>Confirm your password to update account details.</small>
+                </label>
+                <button class="button button-primary" type="submit">Save profile</button>
+            </form>
+        </section>
+
+        <section class="profile-card">
+            <div class="settings-group-heading">
+                <h2>Change password</h2>
+                <p>Choose a new password with at least 8 characters.</p>
+            </div>
+            <% if (passwordSaved) { %><p class="form-message form-message-success" role="status">Your password has been changed.</p><% } %>
+            <% if (passwordError) { %><p class="form-message form-message-error" role="alert"><%= passwordError %></p><% } %>
+            <form class="account-form" action="/profile/password" method="post">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                <label>
+                    <span>Current password</span>
+                    <input type="password" name="currentPassword" autocomplete="current-password" required>
+                </label>
+                <label>
+                    <span>New password</span>
+                    <input type="password" name="password" minlength="8" maxlength="128" autocomplete="new-password" required>
+                </label>
+                <label>
+                    <span>Confirm new password</span>
+                    <input type="password" name="passwordConfirmation" minlength="8" maxlength="128" autocomplete="new-password" required>
+                </label>
+                <button class="button button-primary" type="submit">Change password</button>
+            </form>
+        </section>
+
+        <section class="profile-card profile-picture-card">
+            <div class="profile-picture-card-heading">
+                <div class="profile-avatar">
+                    <% if (currentUser.hasProfilePicture) { %>
+                        <img src="/profile/picture" alt="">
+                    <% } else { %>
+                        <%= currentUser.username.slice(0, 1).toUpperCase() %>
+                    <% } %>
+                </div>
+                <div>
+                    <h2>Profile picture</h2>
+                    <p>Upload a PNG, JPEG, or WebP image up to 2 MB.</p>
+                </div>
+            </div>
+            <% if (pictureSaved) { %><p class="form-message form-message-success" role="status">Your profile picture has been updated.</p><% } %>
+            <% if (pictureRemoved) { %><p class="form-message form-message-success" role="status">Your profile picture has been removed.</p><% } %>
+            <% if (pictureError) { %><p class="form-message form-message-error" role="alert"><%= pictureError %></p><% } %>
+            <form class="account-form profile-picture-form" action="/profile/picture" method="post" enctype="multipart/form-data">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                <label>
+                    <span>Choose an image</span>
+                    <input type="file" name="profilePicture" accept="image/png,image/jpeg,image/webp" required>
+                </label>
+                <button class="button button-primary" type="submit">Upload picture</button>
+            </form>
+            <% if (currentUser.hasProfilePicture) { %>
+                <form class="profile-picture-remove-form" action="/profile/picture/delete" method="post">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <button class="button button-secondary" type="submit">Remove picture</button>
+                </form>
+            <% } %>
+        </section>
+    </div>
+    <nav class="profile-actions" aria-label="Profile shortcuts">
+        <a class="button button-secondary" href="/bookmarks">Bookmarks</a>
+        <a class="button button-secondary" href="/continue-reading">Continue Reading</a>
+        <a class="button button-secondary" href="/settings">Settings</a>
+    </nav>
+</section>
+
+<%- include('partials/footer.ejs') %>

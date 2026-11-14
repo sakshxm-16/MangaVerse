@@ -1,0 +1,36 @@
+<%- include('partials/header.ejs') %>
+
+<section class="reader-page" data-reader data-default-width="<%= currentUser ? userPreferences.readerWidth : '' %>" data-chapter-id="<%= chapterId %>" data-manga-id="<%= mangaId %>" data-manga-title="<%= mangaTitle %>" data-chapter-title="<%= chapterTitle %>">
+    <div class="reader-topbar">
+        <div class="reader-heading">
+            <a class="back-link" href="/title/<%= mangaId %>">← <%= mangaTitle %></a>
+            <h1><%= chapterTitle %></h1>
+            <p>Translated by <a href="https://mangadex.org" target="_blank" rel="noreferrer"><%= group %></a> · via MangaDex</p>
+        </div>
+        <div class="reader-controls">
+            <label for="reader-width">Page width</label>
+            <select id="reader-width" data-reader-width>
+                <option value="wide">Wide</option>
+                <option value="medium">Medium</option>
+                <option value="fit">Fit screen</option>
+            </select>
+        </div>
+    </div>
+    <div class="reader-nav">
+        <% if (previous) { %><a class="button button-secondary" href="/read/<%= previous %>">← Previous</a><% } else { %><span></span><% } %>
+        <span class="page-counter"><%= pages.length %> pages</span>
+        <% if (next) { %><a class="button button-primary" href="/read/<%= next %>">Next chapter →</a><% } else { %><span></span><% } %>
+    </div>
+    <div class="reader-pages" data-page-width="wide">
+        <% pages.forEach((page, index) => { %>
+            <img src="<%= page %>" alt="Page <%= index + 1 %>" referrerpolicy="no-referrer" <%= index === 0 ? 'fetchpriority="high"' : 'loading="lazy"' %>>
+        <% }) %>
+    </div>
+    <div class="reader-nav reader-nav-bottom">
+        <% if (previous) { %><a class="button button-secondary" href="/read/<%= previous %>">← Previous chapter</a><% } else { %><span></span><% } %>
+        <span class="reader-credit">Chapter images are served by MangaDex. Please support the credited translation group.</span>
+        <% if (next) { %><a class="button button-primary" href="/read/<%= next %>">Next chapter →</a><% } else { %><span></span><% } %>
+    </div>
+</section>
+
+<%- include('partials/footer.ejs') %>
