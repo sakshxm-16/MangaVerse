@@ -155,6 +155,13 @@ app.set("view engine", "ejs");
 app.set("views", fileURLToPath(new URL("./views", import.meta.url)));
 app.use(express.urlencoded({ extended: false, limit: "20kb" }));
 app.use(express.static(fileURLToPath(new URL("./public", import.meta.url))));
+app.get("/favicon/:color.svg", (req, res) => {
+    const color = req.params.color;
+    if (!/^[0-9a-f]{6}$/i.test(color)) return res.sendStatus(404);
+    res.type("image/svg+xml")
+        .set("Cache-Control", "public, max-age=31536000, immutable")
+        .send(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><path fill="#${color.toLowerCase()}" d="M32 4 38.5 23.1 58.6 23.5 42.3 35.9 48.2 55.1 32 43.5 15.8 55.1 21.7 35.9 5.4 23.5 25.5 23.1Z"/></svg>`);
+});
 
 function localizedText(text, language = "en") {
     if (!text) return "";
