@@ -1,0 +1,111 @@
+<form class="browse-form" method="get" action="/browse" data-browse-form>
+    <div class="browse-toolbar">
+        <div class="browse-search-row">
+            <label class="sr-only" for="browse-search">Search titles</label>
+            <span class="search-icon" aria-hidden="true">⌕</span>
+            <input id="browse-search" type="search" name="q" value="<%= query %>" maxlength="120" placeholder="Search titles...">
+        </div>
+        <button class="filter-toggle" type="button" data-browse-filter-toggle aria-expanded="<%= filtersOpen %>" aria-controls="browse-filters">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 17h16"></path><circle cx="8" cy="7" r="2"></circle><circle cx="16" cy="17" r="2"></circle></svg>
+            Filters
+            <span class="filter-count" data-filter-count <%= activeFilterCount ? "" : "hidden" %>><%= activeFilterCount %></span>
+        </button>
+    </div>
+
+    <div class="browse-filter-panel" id="browse-filters" data-browse-filter-panel <%= filtersOpen ? "" : "hidden" %>>
+        <div class="filter-grid">
+            <div class="filter-field">
+                <span class="filter-label">Content rating</span>
+                <details class="filter-dropdown">
+                    <summary><%= filters.ratings.length %> selected</summary>
+                    <div class="filter-options">
+                        <% [["safe", "Safe"], ["suggestive", "Suggestive"], ["erotica", "Erotica"], ["pornographic", "Pornographic"]].forEach(([value, label]) => { %>
+                            <label><input type="checkbox" name="rating" value="<%= value %>" <%= filters.ratings.includes(value) ? "checked" : "" %>><span><%= label %></span></label>
+                        <% }) %>
+                    </div>
+                </details>
+            </div>
+
+            <label class="filter-field">
+                <span class="filter-label">Type</span>
+                <select name="type">
+                    <option value="">Any type</option>
+                    <% Object.entries(mangaTypes).forEach(([value, item]) => { %>
+                        <option value="<%= value %>" <%= filters.type === value ? "selected" : "" %>><%= item.label %></option>
+                    <% }) %>
+                    <option value="webtoons" <%= filters.type === "webtoons" ? "selected" : "" %>>Webtoons (Manhwa + Manhua)</option>
+                </select>
+            </label>
+
+            <div class="filter-field">
+                <span class="filter-label">Genres</span>
+                <details class="filter-dropdown">
+                    <summary><%= filters.tags.length ? `${filters.tags.length} selected` : "Any genre" %></summary>
+                    <div class="filter-options filter-options-tall">
+                        <% genreTags.forEach((tag) => { %>
+                            <label><input type="checkbox" name="tag" value="<%= tag.id %>" <%= filters.tags.includes(tag.id) ? "checked" : "" %>><span><%= tag.name %></span></label>
+                        <% }) %>
+                    </div>
+                </details>
+            </div>
+
+            <label class="filter-field">
+                <span class="filter-label">Translated language</span>
+                <select name="language">
+                    <option value="">Any language</option>
+                    <% languages.forEach((language) => { %>
+                        <option value="<%= language.code %>" <%= filters.language === language.code ? "selected" : "" %>><%= language.name %></option>
+                    <% }) %>
+                </select>
+            </label>
+
+            <div class="filter-field">
+                <span class="filter-label">Status</span>
+                <details class="filter-dropdown">
+                    <summary><%= filters.statuses.length ? `${filters.statuses.length} selected` : "Any status" %></summary>
+                    <div class="filter-options">
+                        <% [["ongoing", "Ongoing"], ["completed", "Completed"], ["hiatus", "Hiatus"], ["cancelled", "Cancelled"]].forEach(([value, label]) => { %>
+                            <label><input type="checkbox" name="status" value="<%= value %>" <%= filters.statuses.includes(value) ? "checked" : "" %>><span><%= label %></span></label>
+                        <% }) %>
+                    </div>
+                </details>
+            </div>
+
+            <label class="filter-field">
+                <span class="filter-label">Author / artist</span>
+                <input type="search" name="author" value="<%= filters.author %>" maxlength="100" placeholder="Name">
+            </label>
+
+            <fieldset class="filter-field year-range">
+                <legend class="filter-label">Release year</legend>
+                <div class="year-inputs">
+                    <label class="sr-only" for="year-from">From year</label>
+                    <input id="year-from" type="number" name="yearFrom" min="1900" max="<%= new Date().getFullYear() %>" value="<%= filters.yearFrom %>" placeholder="From">
+                    <span aria-hidden="true">–</span>
+                    <label class="sr-only" for="year-to">To year</label>
+                    <input id="year-to" type="number" name="yearTo" min="1900" max="<%= new Date().getFullYear() %>" value="<%= filters.yearTo %>" placeholder="To">
+                </div>
+            </fieldset>
+
+            <label class="filter-field">
+                <span class="filter-label">Minimum chapters</span>
+                <input type="number" name="minChapters" min="1" max="9999" value="<%= filters.minChapters %>" placeholder="Any">
+            </label>
+
+            <label class="filter-field">
+                <span class="filter-label">Sort by</span>
+                <select name="sort">
+                    <% Object.entries(sortOptions).forEach(([value, label]) => { %>
+                        <option value="<%= value %>" <%= filters.sort === value ? "selected" : "" %>><%= label %></option>
+                    <% }) %>
+                </select>
+            </label>
+        </div>
+
+        <p class="filter-note">MangaDex does not support year ranges or exact chapter counts. Year ranges and the minimum-chapter estimate are applied to each results page; the estimate uses the latest chapter number.</p>
+        <div class="filter-actions">
+            <a class="button button-secondary" href="/browse">Reset filters</a>
+            <button class="button button-primary" type="submit">Apply filters <span aria-hidden="true">→</span></button>
+        </div>
+    </div>
+</form>

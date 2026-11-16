@@ -4,6 +4,7 @@ const READING_PROGRESS_KEY = "mangaverse-reading-progress-v1";
 const CUSTOM_FOLDERS_KEY = "mangaverse-bookmark-folders-v1";
 const NOTIFICATIONS_KEY = "mangaverse-notifications-v1";
 const CHAPTER_SNAPSHOTS_KEY = "mangaverse-bookmark-chapters-v1";
+const isAuthenticated = document.body.dataset.authenticated === "true";
 const DEFAULT_FOLDERS = [
     { id: "reading", name: "Reading" },
     { id: "completed", name: "Completed" },
@@ -257,14 +258,61 @@ const headerMenus = [
     document.querySelector("[data-account-menu]"),
     document.querySelector("[data-notifications-menu]")
 ].filter(Boolean);
+const headerSearch = document.querySelector("[data-header-search]");
+const headerSearchInput = headerSearch?.querySelector("input");
+const quickSearch = document.querySelector("[data-quick-search]");
+const quickSearchToggle = document.querySelector("[data-quick-search-toggle]");
+const quickSearchMenu = document.querySelector("[data-quick-search-menu]");
+const browseForm = document.querySelector("[data-browse-form]");
+const filterCount = document.querySelector("[data-filter-count]");
 
 document.addEventListener("click", (event) => {
     headerMenus.forEach((menu) => {
         if (menu.open && !menu.contains(event.target)) menu.open = false;
     });
+    if (quickSearch && quickSearchMenu && !quickSearch.contains(event.target)) {
+        quickSearchMenu.hidden = true;
+        quickSearchToggle?.setAttribute("aria-expanded", "false");
+    }
 });
+
+function syncBrowseFilterCount() {
+    if (!browseForm || !filterCount) return;
+    const formData = new FormData(browseForm);
+    const ratings = formData.getAll("rating").sort();
+    const defaultRatings = ["safe", "suggestive"];
+    const hasCustomRatings = ratings.join("|") !== defaultRatings.join("|");
+    const count = [
+        formData.get("type"),
+        hasCustomRatings,
+        formData.getAll("tag").length,
+        formData.get("language"),
+        formData.getAll("status").length,
+        formData.get("author"),
+        formData.get("yearFrom") || formData.get("yearTo"),
+        formData.get("minChapters")
+    ].filter(Boolean).length;
+    filterCount.textContent = String(count);
+    filterCount.hidden = count === 0;
+}
+
+browseForm?.addEventListener("input", syncBrowseFilterCount);
+browseForm?.addEventListener("change", syncBrowseFilterCount);
+syncBrowseFilterCount();
+
 document.addEventListener("keydown", (event) => {
+    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
+        event.preventDefault();
+        headerSearchInput?.focus();
+        headerSearchInput?.select();
+        return;
+    }
     if (event.key !== "Escape") return;
+    if (quickSearchMenu && !quickSearchMenu.hidden) {
+        quickSearchMenu.hidden = true;
+        quickSearchToggle?.setAttribute("aria-expanded", "false");
+        quickSearchToggle?.focus();
+    }
     headerMenus.forEach((menu) => {
         if (!menu.open) return;
         menu.open = false;
@@ -278,20 +326,24 @@ document.addEventListener("click", (event) => {
 });
 
 function syncBookmarkButtons(items) {
-    const savedIds = new Set(items.map((item) => item.id));
+    const savedItems = new Map(items.map((item) => [item.id, item]));
+    const folderNames = new Map(getBookmarkFolders().map((folder) => [folder.id, folder.name]));
     document.querySelectorAll("[data-bookmark-id]").forEach((button) => {
-        const saved = savedIds.has(button.dataset.bookmarkId);
-        button.classList.toggle("is-saved", saved);
+        const savedItem = savedItems.get(button.dataset.bookmarkId);
+        const folderName = savedItem ? folderNames.get(savedItem.folderId) || "Plan to Read" : "";
+        button.classList.toggle("is-saved", Boolean(savedItem));
         if (button.matches("[data-bookmark-folder-menu-trigger]")) {
             const label = button.querySelector("[data-bookmark-label]");
-            if (label) label.textContent = saved ? "✓ Saved to library" : "＋ Add to library";
-            button.title = saved ? "Choose another bookmark folder" : "Add to a bookmark folder";
-            button.setAttribute("aria-label", `${saved ? "Change" : "Add"} ${button.dataset.bookmarkTitle || "manga"} ${saved ? "bookmark folder" : "to a bookmark folder"}`);
+            if (label) label.textContent = savedItem ? folderName : "＋ Add to library";
+            button.title = savedItem ? `Saved to ${folderName}; choose another folder or remove` : "Add to a bookmark folder";
+            button.setAttribute("aria-label", savedItem
+                ? `${button.dataset.bookmarkTitle || "Manga"} saved to ${folderName}. Choose another folder or remove it from bookmarks.`
+                : `Add ${button.dataset.bookmarkTitle || "manga"} to a bookmark folder`);
             return;
         }
-        button.textContent = saved ? "✓" : "＋";
-        button.title = saved ? "Remove from library" : "Add to library";
-        button.setAttribute("aria-label", `${saved ? "Remove" : "Add"} ${button.dataset.bookmarkTitle || "manga"} ${saved ? "from" : "to"} library`);
+        button.textContent = savedItem ? "✓" : "＋";
+        button.title = savedItem ? "Remove from library" : "Add to library";
+        button.setAttribute("aria-label", `${savedItem ? "Remove" : "Add"} ${button.dataset.bookmarkTitle || "manga"} ${savedItem ? "from" : "to"} library`);
     });
 }
 
@@ -318,6 +370,14 @@ function renderBookmarkFolderMenu(trigger) {
             option.setAttribute("aria-pressed", String(savedItem?.folderId === folder.id));
             return option;
         });
+    if (savedItem) {
+        const removeButton = document.createElement("button");
+        removeButton.className = "bookmark-folder-remove";
+        removeButton.type = "button";
+        removeButton.dataset.bookmarkRemove = trigger.dataset.bookmarkId;
+        removeButton.textContent = "Remove";
+        options.push(removeButton);
+    }
     menu.replaceChildren(...options);
 }
 
@@ -1028,6 +1088,28 @@ document.addEventListener("click", (event) => {
     const notificationLink = event.target.closest("[data-notification-id]");
     if (notificationLink) setNotificationRead(notificationLink.dataset.notificationId);
 
+    const quickSearchButton = event.target.closest("[data-quick-search-toggle]");
+    if (quickSearchButton && quickSearchMenu) {
+        quickSearchMenu.hidden = !quickSearchMenu.hidden;
+        quickSearchButton.setAttribute("aria-expanded", String(!quickSearchMenu.hidden));
+        return;
+    }
+
+    const filterToggle = event.target.closest("[data-browse-filter-toggle]");
+    if (filterToggle) {
+        const panel = document.querySelector("[data-browse-filter-panel]");
+        if (panel) {
+            panel.hidden = !panel.hidden;
+            filterToggle.setAttribute("aria-expanded", String(!panel.hidden));
+        }
+        return;
+    }
+
+    if (event.target.closest("[data-bookmark-id], [data-bookmark-folder-choice], [data-bookmark-remove]") && !isAuthenticated) {
+        showNotice("Sign in to save manga to your library.");
+        return;
+    }
+
     const removeFolder = event.target.closest("[data-remove-custom-folder]");
     if (removeFolder) {
         removeCustomFolder(removeFolder.dataset.removeCustomFolder);
@@ -1134,6 +1216,21 @@ document.addEventListener("click", (event) => {
         syncBookmarkButtons(nextLibrary);
         closeBookmarkFolderMenus();
         showNotice(existing ? `Moved to ${folder.name}.` : `Added to ${folder.name}.`);
+        recordChapterNotifications([]);
+        if (document.querySelector("[data-library-grid]")) renderLibrary();
+        if (document.querySelector("[data-home-bookmarks-grid]")) renderHomeBookmarkUpdates();
+        return;
+    }
+
+    const removeBookmark = event.target.closest("[data-bookmark-remove]");
+    if (removeBookmark) {
+        const library = getLibrary();
+        const nextLibrary = library.filter((item) => item.id !== removeBookmark.dataset.bookmarkRemove);
+        if (nextLibrary.length === library.length || !saveLibrary(nextLibrary)) return;
+        updateLibraryCount(nextLibrary);
+        syncBookmarkButtons(nextLibrary);
+        closeBookmarkFolderMenus();
+        showNotice("Removed from your bookmarks.");
         recordChapterNotifications([]);
         if (document.querySelector("[data-library-grid]")) renderLibrary();
         if (document.querySelector("[data-home-bookmarks-grid]")) renderHomeBookmarkUpdates();

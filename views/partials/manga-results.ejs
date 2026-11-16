@@ -1,0 +1,62 @@
+<section class="catalog-section" id="catalog">
+    <% if (browsePage) { %>
+        <div class="browse-results-heading">
+            <% if (query) { %><h2>Results for “<%= query %>”</h2><% } %>
+            <p class="pagination-count"><%= total.toLocaleString("en-US") %> titles</p>
+        </div>
+    <% } else { %>
+        <div class="section-heading">
+            <div>
+                <p class="eyebrow"><%= query ? "SEARCH RESULTS" : "HANDPICKED FOR YOU" %></p>
+                <h2><%= query ? `Results for “${query}”` : sort === "latestUploadedChapter" ? "Fresh updates" : "Popular right now" %></h2>
+            </div>
+            <div class="catalog-tabs" aria-label="Browse manga">
+                <a href="/" class="<%= sort === "followedCount" && !query ? "selected" : "" %>">Popular</a>
+                <a href="/?sort=latestUploadedChapter" class="<%= sort === "latestUploadedChapter" && !query ? "selected" : "" %>">Latest</a>
+            </div>
+        </div>
+    <% } %>
+
+    <% if (manga.length) { %>
+        <div class="manga-grid">
+            <% manga.forEach((item, index) => { %>
+                <article class="manga-card" style="--card-index: <%= index %>">
+                    <a class="cover-link" href="/title/<%= item.id %>" aria-label="View <%= item.title %>">
+                        <% if (item.cover) { %>
+                            <img class="manga-cover" src="<%= item.cover %>" alt="Cover of <%= item.title %>" loading="lazy" referrerpolicy="no-referrer">
+                        <% } else { %>
+                            <div class="cover-placeholder"><span><%= item.title.slice(0, 1) %></span></div>
+                        <% } %>
+                        <span class="status-badge"><%= item.status %></span>
+                    </a>
+                    <div class="manga-card-info">
+                        <div class="manga-card-title-row">
+                            <h3><a href="/title/<%= item.id %>"><%= item.title %></a></h3>
+                        </div>
+                        <p class="manga-meta"><%= item.year || "Manga" %><span>·</span><%= item.rating %></p>
+                        <div class="tag-list">
+                            <% item.tags.forEach((tag) => { %><span><%= tag %></span><% }) %>
+                        </div>
+                    </div>
+                </article>
+            <% }) %>
+        </div>
+    <% } else { %>
+        <div class="empty-state">
+            <span class="empty-icon">⌕</span>
+            <h3><%= localFilterActive && candidateCount ? "No matches on this results page" : "No manga found" %></h3>
+            <p><%= localFilterActive && candidateCount ? "Try the next page or relax your year or chapter filter." : "Try a different title or adjust your filters." %></p>
+            <a class="button button-secondary" href="<%= browsePage ? "/browse" : "/" %>">Back to discovery</a>
+        </div>
+    <% } %>
+    <% if (localFilterActive) { %>
+        <p class="pagination-count filter-results-count"><%= manga.length %> matching titles on this page · <%= total %> catalog results before local filters</p>
+    <% } %>
+    <% if (previousUrl || nextUrl) { %>
+        <nav class="pagination" aria-label="Catalog pages">
+            <% if (previousUrl) { %><a class="button button-secondary" href="<%= previousUrl %>">← Previous</a><% } else { %><span></span><% } %>
+            <% if (!localFilterActive) { %><span class="pagination-count">Showing <%= offset + 1 %>–<%= Math.min(offset + candidateCount, total) %> of <%= total %></span><% } %>
+            <% if (nextUrl) { %><a class="button button-secondary" href="<%= nextUrl %>">Next →</a><% } %>
+        </nav>
+    <% } %>
+</section>

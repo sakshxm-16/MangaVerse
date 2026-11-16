@@ -16,14 +16,14 @@
     </div>
 </section>
 
-<% if (!showFilters && trending.length && userPreferences.showTrending) { %>
+<% if (trending.length && userPreferences.showTrending) { %>
 <section class="trending-section" data-trending-section aria-labelledby="trending-title">
     <div class="section-heading trending-heading">
         <div>
             <p class="eyebrow">TRENDING NOW</p>
             <h2 id="trending-title">Popular this moment</h2>
         </div>
-        <a class="button button-secondary" href="/search">Explore more <span aria-hidden="true">→</span></a>
+        <a class="button button-secondary" href="/browse">Explore more <span aria-hidden="true">→</span></a>
     </div>
     <div class="trending-grid">
         <% trending.forEach((item, index) => { %>
@@ -44,7 +44,7 @@
 </section>
 <% } %>
 
-<% if (!showFilters && userPreferences.showContinueReading) { %>
+<% if (userPreferences.showContinueReading) { %>
 <section class="home-reading-section" data-home-reading-section hidden aria-labelledby="home-reading-title">
     <div class="section-heading">
         <div>
@@ -56,7 +56,7 @@
 </section>
 <% } %>
 
-<% if (!showFilters && userPreferences.showBookmarkedUpdates) { %>
+<% if (currentUser && userPreferences.showBookmarkedUpdates) { %>
 <section class="home-bookmarked-updates" data-home-bookmarks aria-labelledby="home-bookmarks-title">
     <div class="section-heading">
         <div>
@@ -75,172 +75,6 @@
 </section>
 <% } %>
 
-<% if (showFilters) { %>
-<section class="browse-tools" aria-labelledby="browse-title">
-    <div class="browse-heading">
-        <p class="eyebrow">BROWSE THE CATALOG</p>
-        <h2 id="browse-title">Find your next read</h2>
-    </div>
-    <form class="browse-form" method="get" action="/search">
-        <div class="browse-search-row">
-            <label class="sr-only" for="browse-search">Search titles</label>
-            <span class="search-icon" aria-hidden="true">⌕</span>
-            <input id="browse-search" type="search" name="q" value="<%= query %>" maxlength="120" placeholder="Search titles...">
-            <button class="button button-primary" type="submit">Search</button>
-        </div>
-
-        <div class="filter-grid">
-            <div class="filter-field">
-                <span class="filter-label">Content rating</span>
-                <details class="filter-dropdown">
-                    <summary><%= filters.ratings.length %> selected</summary>
-                    <div class="filter-options">
-                        <% [['safe', 'Safe'], ['suggestive', 'Suggestive'], ['erotica', 'Erotica'], ['pornographic', 'Pornographic']].forEach(([value, label]) => { %>
-                            <label><input type="checkbox" name="rating" value="<%= value %>" <%= filters.ratings.includes(value) ? 'checked' : '' %>><span><%= label %></span></label>
-                        <% }) %>
-                    </div>
-                </details>
-            </div>
-
-            <label class="filter-field">
-                <span class="filter-label">Type</span>
-                <select name="type">
-                    <option value="">Any type</option>
-                    <% Object.entries(mangaTypes).forEach(([value, item]) => { %>
-                        <option value="<%= value %>" <%= filters.type === value ? 'selected' : '' %>><%= item.label %></option>
-                    <% }) %>
-                </select>
-            </label>
-
-            <div class="filter-field">
-                <span class="filter-label">Genres</span>
-                <details class="filter-dropdown">
-                    <summary><%= filters.tags.length ? `${filters.tags.length} selected` : 'Any genre' %></summary>
-                    <div class="filter-options filter-options-tall">
-                        <% genreTags.forEach((tag) => { %>
-                            <label><input type="checkbox" name="tag" value="<%= tag.id %>" <%= filters.tags.includes(tag.id) ? 'checked' : '' %>><span><%= tag.name %></span></label>
-                        <% }) %>
-                    </div>
-                </details>
-            </div>
-
-            <label class="filter-field">
-                <span class="filter-label">Translated language</span>
-                <select name="language">
-                    <option value="">Any language</option>
-                    <% languages.forEach((language) => { %>
-                        <option value="<%= language.code %>" <%= filters.language === language.code ? 'selected' : '' %>><%= language.name %></option>
-                    <% }) %>
-                </select>
-            </label>
-
-            <div class="filter-field">
-                <span class="filter-label">Status</span>
-                <details class="filter-dropdown">
-                    <summary><%= filters.statuses.length ? `${filters.statuses.length} selected` : 'Any status' %></summary>
-                    <div class="filter-options">
-                        <% [['ongoing', 'Ongoing'], ['completed', 'Completed'], ['hiatus', 'Hiatus'], ['cancelled', 'Cancelled']].forEach(([value, label]) => { %>
-                            <label><input type="checkbox" name="status" value="<%= value %>" <%= filters.statuses.includes(value) ? 'checked' : '' %>><span><%= label %></span></label>
-                        <% }) %>
-                    </div>
-                </details>
-            </div>
-
-            <label class="filter-field">
-                <span class="filter-label">Author / artist</span>
-                <input type="search" name="author" value="<%= filters.author %>" maxlength="100" placeholder="Name">
-            </label>
-
-            <fieldset class="filter-field year-range">
-                <legend class="filter-label">Release year</legend>
-                <div class="year-inputs">
-                    <label class="sr-only" for="year-from">From year</label>
-                    <input id="year-from" type="number" name="yearFrom" min="1900" max="<%= new Date().getFullYear() %>" value="<%= filters.yearFrom %>" placeholder="From">
-                    <span aria-hidden="true">–</span>
-                    <label class="sr-only" for="year-to">To year</label>
-                    <input id="year-to" type="number" name="yearTo" min="1900" max="<%= new Date().getFullYear() %>" value="<%= filters.yearTo %>" placeholder="To">
-                </div>
-            </fieldset>
-
-            <label class="filter-field">
-                <span class="filter-label">Minimum chapters</span>
-                <input type="number" name="minChapters" min="1" max="9999" value="<%= filters.minChapters %>" placeholder="Any">
-            </label>
-
-            <label class="filter-field">
-                <span class="filter-label">Sort by</span>
-                <select name="sort">
-                    <% Object.entries(sortOptions).forEach(([value, label]) => { %>
-                        <option value="<%= value %>" <%= filters.sort === value ? 'selected' : '' %>><%= label %></option>
-                    <% }) %>
-                </select>
-            </label>
-        </div>
-
-        <p class="filter-note">MangaDex does not support year ranges or exact chapter counts. Year ranges and the minimum-chapter estimate are applied to each results page; the estimate uses the latest chapter number.</p>
-        <div class="filter-actions">
-            <a class="button button-secondary" href="/search">Reset filters</a>
-            <button class="button button-primary" type="submit">Apply filters <span aria-hidden="true">→</span></button>
-        </div>
-    </form>
-</section>
-<% } %>
-
-<section class="catalog-section" id="catalog">
-    <div class="section-heading">
-        <div>
-            <p class="eyebrow"><%= query ? 'SEARCH RESULTS' : 'HANDPICKED FOR YOU' %></p>
-            <h2><%= query ? `Results for “${query}”` : sort === 'latestUploadedChapter' ? 'Fresh updates' : 'Popular right now' %></h2>
-        </div>
-        <div class="catalog-tabs" aria-label="Browse manga">
-            <a href="/" class="<%= sort === 'followedCount' && !query ? 'selected' : '' %>">Popular</a>
-            <a href="/?sort=latestUploadedChapter" class="<%= sort === 'latestUploadedChapter' && !query ? 'selected' : '' %>">Latest</a>
-        </div>
-    </div>
-
-    <% if (manga.length) { %>
-        <div class="manga-grid">
-            <% manga.forEach((item, index) => { %>
-                <article class="manga-card" style="--card-index: <%= index %>">
-                    <a class="cover-link" href="/title/<%= item.id %>" aria-label="View <%= item.title %>">
-                        <% if (item.cover) { %>
-                            <img class="manga-cover" src="<%= item.cover %>" alt="Cover of <%= item.title %>" loading="lazy" referrerpolicy="no-referrer">
-                        <% } else { %>
-                            <div class="cover-placeholder"><span><%= item.title.slice(0, 1) %></span></div>
-                        <% } %>
-                        <span class="status-badge"><%= item.status %></span>
-                    </a>
-                    <div class="manga-card-info">
-                        <div class="manga-card-title-row">
-                            <h3><a href="/title/<%= item.id %>"><%= item.title %></a></h3>
-                            <button class="bookmark-button" type="button" data-bookmark-id="<%= item.id %>" data-bookmark-title="<%= item.title %>" data-bookmark-cover="<%= item.cover %>" aria-label="Add <%= item.title %> to library" title="Add to library">＋</button>
-                        </div>
-                        <p class="manga-meta"><%= item.year || 'Manga' %><span>·</span><%= item.rating %></p>
-                        <div class="tag-list">
-                            <% item.tags.forEach((tag) => { %><span><%= tag %></span><% }) %>
-                        </div>
-                    </div>
-                </article>
-            <% }) %>
-        </div>
-    <% } else { %>
-        <div class="empty-state">
-            <span class="empty-icon">⌕</span>
-            <h3><%= localFilterActive && candidateCount ? 'No matches on this results page' : 'No manga found' %></h3>
-            <p><%= localFilterActive && candidateCount ? 'Try the next page or relax your year or chapter filter.' : 'Try a different title or adjust your filters.' %></p>
-            <a class="button button-secondary" href="/">Back to discovery</a>
-        </div>
-    <% } %>
-    <% if (localFilterActive) { %>
-        <p class="pagination-count filter-results-count"><%= manga.length %> matching titles on this page · <%= total %> catalog results before local filters</p>
-    <% } %>
-    <% if (previousUrl || nextUrl) { %>
-        <nav class="pagination" aria-label="Catalog pages">
-            <% if (previousUrl) { %><a class="button button-secondary" href="<%= previousUrl %>">← Previous</a><% } else { %><span></span><% } %>
-            <% if (!localFilterActive) { %><span class="pagination-count">Showing <%= offset + 1 %>–<%= Math.min(offset + candidateCount, total) %> of <%= total %></span><% } %>
-            <% if (nextUrl) { %><a class="button button-secondary" href="<%= nextUrl %>">Next →</a><% } %>
-        </nav>
-    <% } %>
-</section>
+<%- include('partials/manga-results.ejs') %>
 
 <%- include('partials/footer.ejs') %>

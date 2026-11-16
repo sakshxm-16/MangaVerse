@@ -20,12 +20,14 @@
             <% } else { %>
                 <span class="button button-disabled">No English chapters available</span>
             <% } %>
-            <div class="bookmark-dropdown" data-bookmark-dropdown>
-                <button class="button button-secondary bookmark-button-large" type="button" data-bookmark-id="<%= manga.id %>" data-bookmark-title="<%= manga.title %>" data-bookmark-cover="<%= manga.cover %>" data-bookmark-folder-menu-trigger aria-expanded="false" aria-controls="bookmark-folder-menu">
-                    <span data-bookmark-label>＋ Add to library</span><span class="bookmark-dropdown-chevron" aria-hidden="true">⌄</span>
-                </button>
-                <div class="bookmark-folder-menu" id="bookmark-folder-menu" data-bookmark-folder-menu hidden role="group" aria-label="Choose a bookmark folder"></div>
-            </div>
+            <% if (currentUser) { %>
+                <div class="bookmark-dropdown" data-bookmark-dropdown>
+                    <button class="button button-secondary bookmark-button-large" type="button" data-bookmark-id="<%= manga.id %>" data-bookmark-title="<%= manga.title %>" data-bookmark-cover="<%= manga.cover %>" data-bookmark-folder-menu-trigger aria-expanded="false" aria-controls="bookmark-folder-menu">
+                        <span data-bookmark-label>＋ Add to library</span><span class="bookmark-dropdown-chevron" aria-hidden="true">⌄</span>
+                    </button>
+                    <div class="bookmark-folder-menu" id="bookmark-folder-menu" data-bookmark-folder-menu hidden role="group" aria-label="Choose a bookmark folder"></div>
+                </div>
+            <% } %>
         </div>
         <div class="title-stats">
             <div><span class="stat-value"><%= chapters.length %></span><span class="stat-label">Chapters loaded</span></div>

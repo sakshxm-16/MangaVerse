@@ -576,9 +576,12 @@ function normalizeBrowseFilters(query) {
         LANGUAGES.some((item) => item.code === query.language)
         ? query.language
         : query.language === "" ? "" : "en";
-    const type = typeof query.type === "string" && Object.hasOwn(MANGA_TYPES, query.type)
-        ? query.type
-        : "";
+    const requestedTypes = queryValues(query.type, [...Object.keys(MANGA_TYPES), "webtoons"]);
+    const types = requestedTypes.includes("webtoons") ||
+        (requestedTypes.includes("manhwa") && requestedTypes.includes("manhua"))
+        ? ["manhwa", "manhua"]
+        : requestedTypes.slice(0, 1);
+    const type = types.length > 1 ? "webtoons" : types[0] || "";
     const sort = typeof query.sort === "string" && Object.hasOwn(SORT_OPTIONS, query.sort)
         ? query.sort
         : title ? "relevance" : "followedCount";
@@ -592,6 +595,7 @@ function normalizeBrowseFilters(query) {
         title,
         ratings: requestedRatings.length ? requestedRatings : DEFAULT_CONTENT_RATINGS,
         type,
+        types,
         tags: (Array.isArray(query.tag) ? query.tag : [query.tag])
             .filter((tag) => typeof tag === "string" && validId(tag))
             .slice(0, 10),
@@ -603,6 +607,12 @@ function normalizeBrowseFilters(query) {
         minChapters,
         sort
     };
+}
+
+function selectedTypeFilters(filters) {
+    if (Array.isArray(filters?.types) && filters.types.length) return filters.types;
+    if (filters?.type === "webtoons") return ["manhwa", "manhua"];
+    return filters?.type && Object.hasOwn(MANGA_TYPES, filters.type) ? [filters.type] : [];
 }
 
 let genreTagCache;
@@ -636,10 +646,8 @@ function mangaQuery({ filters, offset = 0, authorId, limit = PAGE_SIZE } = {}) {
         params.append("contentRating[]", rating));
     if (filters?.language) params.set("availableTranslatedLanguage[]", filters.language);
     if (filters?.title) params.set("title", filters.title);
-    if (filters?.type) {
-        MANGA_TYPES[filters.type].languages.forEach((language) =>
-            params.append("originalLanguage[]", language));
-    }
+    [...new Set(selectedTypeFilters(filters).flatMap((type) => MANGA_TYPES[type].languages))]
+        .forEach((language) => params.append("originalLanguage[]", language));
     (filters?.tags || []).forEach((tag) => params.append("includedTags[]", tag));
     if (filters?.tags?.length) params.set("includedTagsMode", "OR");
     (filters?.statuses || []).forEach((status) => params.append("status[]", status));
@@ -667,7 +675,7 @@ function buildBrowseUrl(filters, offset, path) {
     const params = new URLSearchParams();
     if (filters.title) params.set("q", filters.title);
     filters.ratings.forEach((rating) => params.append("rating", rating));
-    if (filters.type) params.set("type", filters.type);
+    selectedTypeFilters(filters).forEach((type) => params.append("type", type));
     filters.tags.forEach((tag) => params.append("tag", tag));
     params.set("language", filters.language);
     filters.statuses.forEach((status) => params.append("status", status));
@@ -737,7 +745,7 @@ app.get("/image/covers/:mangaId/:fileName", async (req, res) => {
     }
 });
 
-async function renderBrowsePage(req, res, showFilters, path) {
+async function renderBrowsePage(req, res, browsePage, path) {
     const filters = normalizeBrowseFilters(req.query);
     const requestedOffset = Number.parseInt(req.query.offset, 10);
     const offset = Number.isFinite(requestedOffset)
@@ -745,9 +753,9 @@ async function renderBrowsePage(req, res, showFilters, path) {
         : 0;
 
     try {
-        const genreTags = showFilters || filters.tags.length ? await getGenreTags() : [];
+        const genreTags = browsePage || filters.tags.length ? await getGenreTags() : [];
         const knownTags = new Set(genreTags.map((tag) => tag.id));
-        if (showFilters || filters.tags.length) {
+        if (browsePage || filters.tags.length) {
             filters.tags = filters.tags.filter((tag) => knownTags.has(tag));
         }
         const authorId = filters.author ? await findAuthorId(filters.author) : null;
@@ -755,7 +763,7 @@ async function renderBrowsePage(req, res, showFilters, path) {
             ? { manga: [], candidateCount: 0, total: 0 }
             : await findManga({ filters, offset, authorId });
         let trending = [];
-        if (!showFilters && !filters.title) {
+        if (!browsePage && !filters.title) {
             const trendingResults = filters.sort === "followedCount"
                 ? results
                 : await findManga({
@@ -768,11 +776,27 @@ async function renderBrowsePage(req, res, showFilters, path) {
             (filters.yearFrom || filters.yearTo) && filters.yearFrom !== filters.yearTo
         );
         const localFilterActive = Boolean(hasYearRange || filters.minChapters);
-        res.render("home", {
+        const hasCustomRatings = filters.ratings.length !== DEFAULT_CONTENT_RATINGS.length ||
+            filters.ratings.some((rating) => !DEFAULT_CONTENT_RATINGS.includes(rating));
+        const activeFilterCount = [
+            filters.type,
+            hasCustomRatings,
+            filters.tags.length,
+            filters.language,
+            filters.statuses.length,
+            filters.author,
+            filters.yearFrom,
+            filters.yearTo,
+            filters.minChapters
+        ].filter(Boolean).length;
+        const filtersOpen = activeFilterCount > 0;
+        res.render(browsePage ? "browse" : "home", {
             pageTitle: filters.title ? `Search: ${filters.title}` : "Browse manga",
             manga: results.manga,
             query: filters.title,
-            showFilters,
+            browsePage,
+            filtersOpen,
+            activeFilterCount,
             trending,
             offset,
             total: results.total,
@@ -797,7 +821,23 @@ async function renderBrowsePage(req, res, showFilters, path) {
 }
 
 app.get("/", async (req, res) => renderBrowsePage(req, res, false, "/"));
-app.get("/search", async (req, res) => renderBrowsePage(req, res, true, "/search"));
+app.get("/browse", async (req, res) => renderBrowsePage(req, res, true, "/browse"));
+app.get("/search", (req, res) => {
+    res.redirect(301, `/browse${req.originalUrl.slice("/search".length)}`);
+});
+
+app.get("/random", async (req, res) => {
+    try {
+        const params = new URLSearchParams();
+        DEFAULT_CONTENT_RATINGS.forEach((rating) => params.append("contentRating[]", rating));
+        const { data } = await api.get("/manga/random", { params });
+        const mangaId = data.data?.id;
+        if (!validId(mangaId)) throw new Error("MangaDex returned an invalid random title.");
+        res.redirect(`/title/${mangaId}`);
+    } catch (error) {
+        renderError(res, error);
+    }
+});
 
 app.get("/register", (req, res) => {
     if (req.currentUser) return res.redirect("/");
@@ -1528,7 +1568,7 @@ app.get("/read/:id", async (req, res) => {
     }
 });
 
-app.get("/bookmarks", (req, res) => {
+app.get("/bookmarks", requireAuth, (req, res) => {
     res.render("library", { pageTitle: "Bookmarks" });
 });
 
