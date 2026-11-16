@@ -41,7 +41,7 @@ Create a local environment file as `.env`.
 
 | Variable | Purpose |
 | --- | --- |
-| `PORT` | Optional server port; defaults to `3000`. |
+| `PORT` | Optional server port; defaults to `6307`. |
 | `APP_BASE_URL` | Base URL used when generating links such as password-reset links. Defaults to the local server URL. |
 | `SESSION_SECRET` | Secret used to sign session-related tokens. Required in production. |
 | `DATABASE_PATH` | Optional SQLite database path; defaults to `data/mangaverse.sqlite`. |
