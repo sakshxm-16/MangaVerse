@@ -457,6 +457,7 @@ button:focus-visible, a:focus-visible, summary:focus-visible, input:focus-visibl
 .manga-meta span { color: var(--muted); }
 .tag-list, .title-tags { display: flex; flex-wrap: wrap; gap: 5px; }
 .tag-list span, .title-tags span { max-width: 100%; overflow: hidden; padding: 4px 6px; border-radius: 4px; background: var(--tag-bg); color: var(--text-secondary); font-size: 9px; text-overflow: ellipsis; white-space: nowrap; }
+.tag-list span { border: 1px solid var(--line); color: var(--text); font-size: 10px; font-weight: 600; }
 
 .pagination { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 34px; }
 .pagination-count { color: var(--muted); font-size: 11px; }
@@ -737,7 +738,7 @@ body.reader-chrome-hidden .site-header, body.reader-chrome-hidden .reader-topbar
     .manga-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px 12px; }
     .cover-link { height: auto; aspect-ratio: 2 / 3; }
     .manga-card h3 { font-size: 11px; }
-    .tag-list { display: none; }
+    .tag-list span { padding: 3px 5px; font-size: 8px; }
     .title-hero { grid-template-columns: 120px 1fr; gap: 18px; padding-bottom: 35px; }
     .title-cover-wrap { height: 180px; }
     .title-details { padding-top: 4px; }
