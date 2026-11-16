@@ -35,19 +35,7 @@ From this directory:
 npm ci
 ```
 
-Create a local environment file by copying `.env.example` to `.env`. For example, in PowerShell:
-
-```powershell
-Copy-Item .env.example .env
-```
-
-Then start the app:
-
-```sh
-npm start
-```
-
-Open [http://localhost:3000](http://localhost:3000). Set `PORT` in `.env` to use a different port.
+Create a local environment file as `.env`.
 
 ### Environment variables
 
@@ -65,6 +53,14 @@ Open [http://localhost:3000](http://localhost:3000). Set `PORT` in `.env` to use
 
 Email delivery is unavailable until SMTP is configured. For production, set a strong `SESSION_SECRET` and a public HTTPS `APP_BASE_URL`.
 
+Then start the app:
+
+```sh
+npm start
+```
+
+Open [http://localhost:6307](http://localhost:6307). Set `PORT` in `.env` to use a different port.
+
 ## Data storage
 
 The app creates its SQLite database automatically. The `data/` directory, `.env`, and `node_modules/` are excluded from Git.
@@ -81,7 +77,6 @@ Account data and account preferences are stored in SQLite. Bookmarks, custom boo
 │   └── styles/           # Site styles
 ├── views/                # EJS pages and shared partials
 ├── data/                 # Runtime SQLite database (created automatically)
-├── .env.example          # Environment variable template
 └── package.json
 ```
 
