@@ -1623,5 +1623,5 @@ app.use((req, res) => {
 });
 
 app.listen(PORT, () => {
-    console.log(`MangaVerse is running at http://localhost:${PORT}`);
+    console.log(`MangaVerse is live at Port: ${PORT}`);
 });
